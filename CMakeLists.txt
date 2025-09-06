@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-
-set(PROJECT_NAME set)
+cmake_minimum_required(VERSION 3.23)
+set(PROJECT_NAME "LABA1TERM3")
 project(${PROJECT_NAME})
 
 # TODO(Korniakov): not sure if these lines are needed
