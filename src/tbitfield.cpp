@@ -6,9 +6,14 @@
 // Битовое поле
 
 #include "tbitfield.h"
+#include <string>
 
-static const int BITS_IN_BYTE = 8;
-static const int BITS_IN_BLOCK = BITS_IN_BYTE * sizeof(TELEM);
+TBitField::TBitField()
+{
+  bitLen = 0;
+  memLen = 0;
+  pMem = nullptr;
+}
 
 TBitField::TBitField(int len)
 {
@@ -21,11 +26,13 @@ TBitField::TBitField(int len)
   if (memLen != 0)
   {
     pMem = new TELEM[memLen];
-    for (int i = 0; i < memLen; ++i) {
+    for (int i = 0; i < memLen; ++i)
+    {
       pMem[i] = 0;
     }
   }
-  else {
+  else
+  {
     pMem = nullptr;
   }
 }
@@ -43,11 +50,14 @@ TBitField::TBitField(const TBitField &bf) // конструктор копиро
       pMem[i] = bf.pMem[i];
     }
   }
+  else
+  {
+    pMem = nullptr;
+  }
 }
 
 TBitField::~TBitField()
 {
-  
   if (pMem != nullptr)
   {
     delete[] pMem;
@@ -125,13 +135,16 @@ TBitField& TBitField::operator=(const TBitField &bf) // присваивание
   }
   bitLen = bf.bitLen;
   memLen = bf.memLen;
-  if (memLen != 0) {
+  if (memLen != 0)
+  {
     pMem = new TELEM[memLen];
     for (int i = 0; i < memLen; ++i)
     {
       pMem[i] = bf.pMem[i];
     }
-  } else {
+  }
+  else
+  {
     pMem = nullptr;
   }
   return *this;
@@ -139,7 +152,8 @@ TBitField& TBitField::operator=(const TBitField &bf) // присваивание
 
 bool TBitField::operator==(const TBitField &bf) const // сравнение
 {
-  if (bitLen != bf.bitLen || memLen != bf.memLen) {
+  if (bitLen != bf.bitLen || memLen != bf.memLen)
+  {
     return false;
   }
   for (int i = 0; i < memLen; ++i)
@@ -179,7 +193,7 @@ TBitField TBitField::operator&(const TBitField &bf) // операция "и"
 
   TBitField newBitField(maxBitLen);
   for (int i = 0; i < minMemLen; ++i)
-  { 
+  {
     newBitField.pMem[i] = pMem[i] & bf.pMem[i];
   }
   return newBitField;
@@ -193,7 +207,7 @@ TBitField TBitField::operator~(void) // отрицание
     newBitField.pMem[i] = ~pMem[i];
     if (i == memLen - 1 && bitLen % BITS_IN_BLOCK != 0)
     {
-      newBitField.pMem[i] &= ((1 << (bitLen % BITS_IN_BLOCK)) - 1);  
+      newBitField.pMem[i] &= ((1 << (bitLen % BITS_IN_BLOCK)) - 1);
     }
   }
   return newBitField;
@@ -203,16 +217,36 @@ TBitField TBitField::operator~(void) // отрицание
 
 istream& operator>>(istream &istr, TBitField &bf) // ввод
 {
+  string bitString;
+  istr >> bitString;
+  
+  for (char c : bitString)
+  {
+    if (c != '0' && c != '1')
+    {
+      throw "Invalid bit string - only 0 and 1 allowed";
+    }
+  }
+  
+  TBitField temp(bitString.size());
+  
+  for (int i = 0; i < bitString.size(); ++i)
+  {
+    if (bitString[i] == '1')
+    {
+      temp.SetBit(i);
+    }
+  }
+  
+  bf = temp;
   return istr;
 }
 
 ostream& operator<<(ostream &ostr, const TBitField &bf) // вывод
 {
-  ostr << bf.bitLen << ' ' << bf.memLen << '\n';
-  for (int i = 0; i < bf.memLen; ++i)
+  for (int i = 0; i < bf.bitLen; ++i)
   {
-    ostr << bf.pMem[i] << ' ';
+    ostr << bf.GetBit(i);
   }
-  ostr << '\n';
   return ostr;
 }
